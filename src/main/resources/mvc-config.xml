@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:context="http://www.springframework.org/schema/context" xmlns:util="http://www.springframework.org/schema/util"
+	   xsi:schemaLocation="http://www.springframework.org/schema/mvc
+		http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/util
+		http://www.springframework.org/schema/spring-util.xsd">
+
+	<!-- # dispatcherServlet Context -->
+	<context:component-scan base-package="com.tmoncorp" use-default-filters="false">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+	</context:component-scan>
+	<!-- # mvc -->
+	<mvc:annotation-driven>
+		<mvc:message-converters>
+			<bean class="com.tmoncorp.core.http.converter.TmonMappingJackson2HttpMessageConverter">
+				<property name="objectMapper" ref="tmonObjectMapper" />
+			</bean>
+		</mvc:message-converters>
+	</mvc:annotation-driven>
+
+	<mvc:interceptors>
+		<bean class="com.tmoncorp.core.mvc.interceptor.ApiInterceptorIntegrationInterceptor" />
+	</mvc:interceptors>
+
+	<bean class="com.tmoncorp.core.mvc.method.ApiContextConfiguration" />
+	<!--<bean name="tmonObjectMapper" class="com.tmoncorp.core.api.mapper.TmonFilterObjectMapper" />-->
+	<bean name="tmonObjectMapper" class="com.tmoncorp.wettyapi.mapper.WettyObjectMapper" />
+	<bean id="restTemplate" class="org.springframework.web.client.RestTemplate" />
+</beans>

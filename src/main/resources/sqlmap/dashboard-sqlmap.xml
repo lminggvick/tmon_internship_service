@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD MAPPER 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tmoncorp.wettyapi.dashboard-sqlmap">
+
+    <resultMap id="dashboard" type="com.tmoncorp.wettyapi.model.Dashboard">
+        <id column="dashboard_id" property="dashboardId"/>
+        <result column="dashboard_name" property="dashboardName"/>
+        <result column="dashboard_description" property="dashboardDescription"/>
+        <result column="api_id" property="apiId"/>
+        <collection property="graphCollectionList" column="dashboard_id"
+					ofType="com.tmoncorp.wettyapi.model.DashboardGraphCollection" resultMap="graphCollection"/>
+    </resultMap>
+
+    <resultMap id="graphCollection" type="com.tmoncorp.wettyapi.model.DashboardGraphCollection">
+        <id column="collection_id" property="collectionId"/>
+        <result column="dashboard_id" property="dashboardId"/>
+        <result column="graph_id" property="graphId"/>
+        <result column="graph_detail_type" property="graphSubType"
+                typeHandler="org.apache.ibatis.type.EnumTypeHandler"/>
+		<result column="graph_name" property="graphName"/>
+        <result column="update_date" property="updateDate"/>
+    </resultMap>
+
+    <select id="getDashboardList" resultMap="dashboard">
+		SELECT dashboard_id, dashboard_name, dashboard_description, api_id
+		FROM dashboard
+		WHERE dashboard_id
+		ORDER BY dashboard_id DESC;
+	</select>
+
+    <select id="getDashboardGraphCollections" resultMap="graphCollection">
+		SELECT
+			C.collection_id, C.dashboard_id, C.graph_id, C.graph_detail_type, G.update_date
+		FROM
+			dashboard_graph_collection AS C RIGHT JOIN graph AS G
+		ON C.graph_id = G.graph_id;
+	</select>
+
+    <select id="getDashboardSummaryInformation" resultMap="dashboard">
+		SELECT
+ 			D.dashboard_id,
+ 			D.dashboard_name,
+ 			D.dashboard_description,
+ 			D.api_id,
+
+			C.collection_id,
+			C.dashboard_id,
+			C.graph_id,
+			C.graph_detail_type,
+			G.graph_name
+ 		FROM
+ 			dashboard AS D LEFT JOIN dashboard_graph_collection AS C
+ 		ON
+ 			D.dashboard_id = C.dashboard_id
+ 			JOIN graph AS G
+		ON
+			C.graph_id = G.graph_id
+ 		WHERE
+ 			D.dashboard_id = #{dashboardNo}
+		ORDER BY C.collection_id DESC;
+	</select>
+
+    <select id="getDashboardGraph" resultMap="graphCollection">
+		SELECT
+			collection_id, dashboard_id, graph_id, graph_detail_type
+		FROM
+			dashboard_graph_collection
+		WHERE
+			dashboard_id = #{dashboardId} AND graph_id = #{graphId};
+	</select>
+
+</mapper>

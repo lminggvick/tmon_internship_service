@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD MAPPER 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tmoncorp.service.graphdata">
+
+    <select id="getDeleteStartTimeForDataStorageLifespan" resultType="java.lang.String">
+        <![CDATA[
+
+        SELECT MAX(end_date)
+        FROM xy_graph
+        WHERE start_date < #{minAcceptableDate}
+
+        ]]>
+    </select>
+
+
+    <insert id="insertXYGraphDataOfTypes" useGeneratedKeys="true">
+        INSERT INTO xy_graph (api_type_id, data_x, data_y, start_date, end_date)
+        VALUES
+        <foreach collection="list" item="dataOfTypes" separator=",">
+            (#{dataOfTypes.apiTypeId},
+            #{dataOfTypes.baseType},
+            #{dataOfTypes.dataValue},
+            #{dataOfTypes.startDate},
+            #{dataOfTypes.endDate})
+        </foreach>
+    </insert>
+
+    <insert id="insertXYGraphDataOfTimeList" useGeneratedKeys="true">
+        INSERT INTO xy_graph (api_type_id, data_x, data_y, start_date, end_date)
+        VALUES
+        <foreach collection="list" item="dataOfTime" separator=",">
+            (#{dataOfTime.apiTypeId},
+            #{dataOfTime.timeRange},
+            #{dataOfTime.dataValue},
+            #{dataOfTime.startDate},
+            #{dataOfTime.endDate})
+        </foreach>
+    </insert>
+
+    <insert id="insertCircleGraphDataOfTypes" useGeneratedKeys="true">
+        INSERT INTO circle_graph (api_type_id, pie_name, count, start_date, end_date)
+        VALUES
+        <foreach collection="list" item="dataOfTypes" separator=",">
+            (#{dataOfTypes.apiTypeId},
+            #{dataOfTypes.baseType},
+            #{dataOfTypes.dataValue},
+            #{dataOfTypes.startDate},
+            #{dataOfTypes.endDate})
+        </foreach>
+    </insert>
+
+
+    <delete id="deleteXYGraphDataForApi">
+        DELETE FROM xy_graph
+        WHERE
+        <foreach collection="list" item="apiType" separator="or">
+            api_type_id = #{apiType.apiTypeId}
+        </foreach>
+    </delete>
+
+    <delete id="deleteCircleGraphDataForApi">
+        DELETE FROM circle_graph
+        WHERE
+        <foreach collection="list" item="apiType" separator="or">
+            api_type_id = #{apiType.apiTypeId}
+        </foreach>
+    </delete>
+
+    <delete id="deleteOldXYGraphData">
+        <![CDATA[
+
+        DELETE FROM xy_graph
+        WHERE start_date < #{minAcceptableDate}
+
+        ]]>
+    </delete>
+
+    <delete id="deleteOldCircleGraphData">
+        <![CDATA[
+
+        DELETE FROM circle_graph
+        WHERE start_date < #{minAcceptableDate}
+
+        ]]>
+    </delete>
+
+</mapper>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD MAPPER 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tmoncorp.service.api">
+
+    <resultMap id="usedApi" type="com.tmoncorp.operator.model.UsedApi">
+        <id column="api_id" property="apiId"/>
+        <result column="api_name" property="apiName"/>
+        <result column="request_url" property="requestUrl"/>
+        <result column="http_method" property="httpMethod"/>
+        <result column="return_type" property="returnType"/>
+        <result column="default_description" property="defaultDescription"/>
+        <result column="additional_description" property="additionalDescription"/>
+        <result column="is_used_api" property="isUsedApi"/>
+    </resultMap>
+
+    <resultMap id="apiType" type="com.tmoncorp.operator.model.ApiType">
+        <id column="api_type_id" property="apiTypeId" />
+        <result column="api_id" property="apiId" />
+        <result column="base_type" property="baseType" typeHandler="org.apache.ibatis.type.EnumTypeHandler"/>
+        <result column="data_type" property="dataType" typeHandler="org.apache.ibatis.type.EnumTypeHandler"/>
+        <result column="graph_type" property="graphType" />
+    </resultMap>
+
+    <select id="getIsUsedApi" resultMap="usedApi">
+        SELECT api_id, api_name, request_url, http_method, return_type, default_description, additional_description,
+        	is_used_api
+        FROM api
+        WHERE is_used_api = "T";
+    </select>
+
+    <select id="getApiTypeList" resultMap="apiType">
+        SELECT api_type_id, api_id, base_type, data_type, graph_type
+        FROM api_type
+        WHERE api_id = #{apiId};
+    </select>
+
+    <select id="getMatchingApiTypeList" resultMap="apiType">
+        SELECT api_type_id, api_id, base_type, data_type, graph_type
+        FROM api_type
+        WHERE api_id = #{apiId, javaType=int, jdbcType=NUMERIC} AND data_type = #{dataType};
+    </select>
+
+</mapper>

@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD MAPPER 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tmoncorp.service.mockdata">
+    <resultMap id="inquiryInfoResult" type="com.tmoncorp.operator.model.mockdata.InquiryInfo">
+        <id column="inquiry_id" property="inquiryId"/>
+        <result column="inquiry_type" property="inquiryType" typeHandler="org.apache.ibatis.type.EnumTypeHandler"/>
+        <result column="inquiry_date" property="date"
+                typeHandler="org.apache.ibatis.type.LocalDateTimeTypeHandler"/>
+        <association property="user" javaType="User" resultMap="userResult"/>
+        <association property="deal" javaType="Deal" resultMap="dealResult"/>
+    </resultMap>
+
+    <resultMap id="visitInfoResult" type="com.tmoncorp.operator.model.mockdata.VisitInfo">
+        <id column="visit_id" property="visitId"/>
+        <result column="platform" property="platform" typeHandler="org.apache.ibatis.type.EnumTypeHandler"/>
+        <result column="visit_date" property="date" typeHandler="org.apache.ibatis.type.LocalDateTimeTypeHandler"/>
+        <association property="user" javaType="User" resultMap="userResult"/>
+        <association property="deal" javaType="Deal" resultMap="dealResult"/>
+    </resultMap>
+
+    <resultMap id="salesInfoResult" type="com.tmoncorp.operator.model.mockdata.SalesInfo">
+        <id column="sold_id" property="soldId"/>
+        <result column="quantity" property="quantity"/>
+        <result column="sold_date" property="date" typeHandler="org.apache.ibatis.type.LocalDateTimeTypeHandler"/>
+        <association property="user" javaType="User" resultMap="userResult"/>
+        <association property="deal" javaType="Deal" resultMap="dealResult"/>
+    </resultMap>
+
+    <resultMap id="userResult" type="com.tmoncorp.operator.model.mockdata.User">
+        <id column="user_id" property="userId"/>
+        <result column="gender" property="gender" typeHandler="org.apache.ibatis.type.EnumTypeHandler"/>
+        <result column="region" property="region" typeHandler="org.apache.ibatis.type.EnumTypeHandler"/>
+        <result column="age" property="age" typeHandler="org.apache.ibatis.type.EnumTypeHandler"/>
+    </resultMap>
+
+    <resultMap id="dealResult" type="com.tmoncorp.operator.model.mockdata.Deal">
+        <id column="deal_no" property="dealNo"/>
+        <result column="category_name" property="categoryName" typeHandler="org.apache.ibatis.type.EnumTypeHandler"/>
+        <result column="deal_name" property="dealName"/>
+        <result column="deal_price" property="dealPrice"/>
+    </resultMap>
+
+
+    <select id="getInquiryInfoList" resultMap="inquiryInfoResult">
+        SELECT U.user_id, U.gender, U.region, U.age,
+              D.deal_no, D.category_name, D.deal_name, D.deal_price,
+              I.inquiry_id, I.inquiry_type, I.inquiry_date
+        FROM tmon_user AS U JOIN tmon_inquiry AS I ON U.user_id = I.user_id
+              JOIN tmon_deal AS D ON D.deal_no = I.deal_no;
+    </select>
+
+    <select id="getInquiryInfoListWithinTime" resultMap="inquiryInfoResult">
+        <![CDATA[
+
+        SELECT U.user_id, U.gender, U.region, U.age,
+              D.deal_no, D.category_name, D.deal_name, D.deal_price,
+              I.inquiry_id, I.inquiry_type, I.inquiry_date
+        FROM tmon_user AS U JOIN tmon_inquiry AS I ON U.user_id = I.user_id
+              JOIN tmon_deal AS D ON D.deal_no = I.deal_no
+        WHERE I.inquiry_date >= #{startTime}
+
+        ]]>
+    </select>
+
+    <select id="getOldInquiryInfoToDelete" resultMap="inquiryInfoResult">
+        <![CDATA[
+
+        SELECT U.user_id, U.gender, U.region, U.age,
+              D.deal_no, D.category_name, D.deal_name, D.deal_price,
+              I.inquiry_id, I.inquiry_type, I.inquiry_date
+        FROM tmon_user AS U JOIN tmon_inquiry AS I ON U.user_id = I.user_id
+              JOIN tmon_deal AS D ON D.deal_no = I.deal_no
+        WHERE I.inquiry_date <= #{deleteStartTime}
+
+        ]]>
+    </select>
+
+    <select id="getVisitInfoList" resultMap="visitInfoResult">
+        SELECT U.user_id, U.gender, U.region, U.age,
+              D.deal_no, D.category_name, D.deal_name, D.deal_price,
+              V.visit_id, V.platform, V.visit_date
+        FROM tmon_user AS U JOIN tmon_deal_visit AS V ON U.user_id = V.user_id
+              JOIN tmon_deal AS D ON D.deal_no = V.deal_no;
+    </select>
+
+    <select id="getVisitInfoListWithinTime" resultMap="visitInfoResult">
+        <![CDATA[
+
+        SELECT U.user_id, U.gender, U.region, U.age,
+              D.deal_no, D.category_name, D.deal_name, D.deal_price,
+              V.visit_id, V.platform, V.visit_date
+        FROM tmon_user AS U JOIN tmon_deal_visit AS V ON U.user_id = V.user_id
+              JOIN tmon_deal AS D ON D.deal_no = V.deal_no
+        WHERE V.visit_date >= #{startTime}
+
+        ]]>
+    </select>
+
+    <select id="getOldVisitInfoToDelete" resultMap="visitInfoResult">
+        <![CDATA[
+
+        SELECT U.user_id, U.gender, U.region, U.age,
+              D.deal_no, D.category_name, D.deal_name, D.deal_price,
+              V.visit_id, V.platform, V.visit_date
+        FROM tmon_user AS U JOIN tmon_deal_visit AS V ON U.user_id = V.user_id
+              JOIN tmon_deal AS D ON D.deal_no = V.deal_no
+        WHERE V.visit_date <= #{deleteStartTime}
+
+        ]]>
+    </select>
+
+    <select id="getSalesInfoList" resultMap="salesInfoResult">
+        SELECT U.user_id, U.gender, U.region, U.age,
+              D.deal_no, D.category_name, D.deal_name, D.deal_price,
+              S.sold_id, S.quantity, S.sold_date
+        FROM tmon_user AS U JOIN tmon_deal_sold AS S ON U.user_id = S.user_id
+              JOIN tmon_deal AS D ON D.deal_no = S.deal_no;
+    </select>
+
+    <select id="getSalesInfoListWithinTime" resultMap="salesInfoResult">
+        <![CDATA[
+
+        SELECT U.user_id, U.gender, U.region, U.age,
+              D.deal_no, D.category_name, D.deal_name, D.deal_price,
+              S.sold_id, S.quantity, S.sold_date
+        FROM tmon_user AS U JOIN tmon_deal_sold AS S ON U.user_id = S.user_id
+              JOIN tmon_deal AS D ON D.deal_no = S.deal_no
+         WHERE S.sold_date >= #{startTime}
+
+        ]]>
+    </select>
+
+    <select id="getOldSalesInfoToDelete" resultMap="salesInfoResult">
+        <![CDATA[
+
+        SELECT U.user_id, U.gender, U.region, U.age,
+              D.deal_no, D.category_name, D.deal_name, D.deal_price,
+              S.sold_id, S.quantity, S.sold_date
+        FROM tmon_user AS U JOIN tmon_deal_sold AS S ON U.user_id = S.user_id
+              JOIN tmon_deal AS D ON D.deal_no = S.deal_no
+         WHERE S.sold_date <= #{deleteStartTime}
+
+        ]]>
+    </select>
+
+    <insert id="insertInquiryInfoList">
+        INSERT INTO tmon_inquiry (user_id, deal_no, category_name, inquiry_type, inquiry_date)
+        VALUES
+        <foreach collection="list" item="inquiry" separator=",">
+            (#{inquiry.user.userId},
+            #{inquiry.deal.dealNo},
+            #{inquiry.deal.categoryName, typeHandler=org.apache.ibatis.type.EnumTypeHandler},
+            #{inquiry.inquiryType, typeHandler=org.apache.ibatis.type.EnumTypeHandler},
+            #{inquiry.date, typeHandler=org.apache.ibatis.type.LocalDateTimeTypeHandler})
+        </foreach>
+    </insert>
+
+    <insert id="insertVisitInfoList">
+        INSERT INTO tmon_deal_visit (user_id, deal_no, category_name, platform, visit_date)
+        VALUES
+        <foreach collection="list" item="visit" separator=",">
+            (#{visit.user.userId},
+            #{visit.deal.dealNo},
+            #{visit.deal.categoryName, typeHandler=org.apache.ibatis.type.EnumTypeHandler},
+            #{visit.platform, typeHandler=org.apache.ibatis.type.EnumTypeHandler},
+            #{visit.date, typeHandler=org.apache.ibatis.type.LocalDateTimeTypeHandler})
+        </foreach>
+    </insert>
+
+    <insert id="insertSalesInfoList">
+        INSERT INTO tmon_deal_sold (user_id, deal_no, category_name, quantity, sold_date)
+        VALUES
+        <foreach collection="list" item="sales" separator=",">
+            (#{sales.user.userId},
+            #{sales.deal.dealNo},
+            #{sales.deal.categoryName, typeHandler=org.apache.ibatis.type.EnumTypeHandler},
+            #{sales.quantity},
+            #{sales.date, typeHandler=org.apache.ibatis.type.LocalDateTimeTypeHandler})
+        </foreach>
+    </insert>
+
+    <insert id="insertUserList">
+        INSERT INTO tmon_user (user_id, gender, region, age)
+        VALUES
+        <foreach collection="list" item="user" separator=",">
+            (#{user.userId},
+            #{user.gender, typeHandler=org.apache.ibatis.type.EnumTypeHandler},
+            #{user.region, typeHandler=org.apache.ibatis.type.EnumTypeHandler},
+            #{user.age, typeHandler=org.apache.ibatis.type.EnumTypeHandler})
+        </foreach>
+    </insert>
+
+    <insert id="insertDealList">
+        INSERT INTO tmon_deal (deal_no, category_name, deal_name, deal_price)
+        VALUE
+        <foreach collection="list" item="deal" separator=",">
+            (#{deal.dealNo},
+            #{deal.categoryName, typeHandler=org.apache.ibatis.type.EnumTypeHandler},
+            #{deal.dealName, typeHandler=org.apache.ibatis.type.EnumTypeHandler},
+            #{deal.dealPrice})
+        </foreach>
+    </insert>
+
+
+    <delete id="deleteUserList">
+        DELETE FROM tmon_user
+        WHERE
+        <foreach collection="list" item="user" separator="or">
+            user_id = #{user.userId}
+        </foreach>
+    </delete>
+
+    <delete id="deleteDealList">
+        DELETE FROM tmon_deal
+        WHERE
+        <foreach collection="list" item="deal" separator="or">
+            deal_no = #{deal.dealNo}
+        </foreach>
+    </delete>
+
+    <delete id="deleteInquiryInfoList">
+        DELETE FROM tmon_inquiry
+        WHERE
+        <foreach collection="list" item="inquiry" separator="or">
+            inquiry_id = #{inquiry.inquiryId}
+        </foreach>
+    </delete>
+
+    <delete id="deleteVisitInfoList">
+        DELETE FROM tmon_deal_visit
+        WHERE
+        <foreach collection="list" item="visit" separator="or">
+            visit_id = #{visit.visitId}
+        </foreach>
+    </delete>
+
+    <delete id="deleteSalesInfoList">
+        DELETE FROM tmon_deal_sold
+        WHERE
+        <foreach collection="list" item="sales" separator="or">
+            sold_id = #{sales.soldId}
+        </foreach>
+    </delete>
+
+    <delete id="deleteAllInquiryInfo">
+        DELETE FROM tmon_inquiry
+    </delete>
+
+    <delete id="deleteAllVisitInfo">
+        DELETE FROM tmon_deal_visit
+    </delete>
+
+    <delete id="deleteAllSalesInfo">
+        DELETE FROM tmon_deal_sold
+    </delete>
+
+</mapper>

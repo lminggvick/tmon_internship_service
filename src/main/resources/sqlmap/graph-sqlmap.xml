@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD MAPPER 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tmoncorp.wettyapi.graph-sqlmap">
+
+    <resultMap id="graph" type="com.tmoncorp.wettyapi.model.Graph">
+        <id column="graph_id" property="graphId"/>
+        <result column="graph_name" property="graphName"/>
+        <result column="graph_description" property="graphDescription"/>
+        <result column="graph_type" property="graphType" typeHandler="org.apache.ibatis.type.EnumTypeHandler"/>
+        <result column="base_type" property="baseType" typeHandler="org.apache.ibatis.type.EnumTypeHandler"/>
+        <result column="data_type" property="dataType" typeHandler="org.apache.ibatis.type.EnumTypeHandler"/>
+        <result column="graph_update_cycle" property="graphUpdateCycle"/>
+        <result column="create_date" property="createDate"/>
+        <result column="update_date" property="updateDate"/>
+    </resultMap>
+
+    <resultMap id="baseTypeCategory" type="com.tmoncorp.wettyapi.model.type.BaseTypeCategory">
+        <result column="graph_id" property="graphId"/>
+        <result column="category_key" property="categoryKey"/>
+        <result column="category_value" property="categoryValue"/>
+    </resultMap>
+
+    <resultMap id="abstractGraphModel" type="com.tmoncorp.wettyapi.model.GraphModel">
+        <id column="graph_data_id" property="graphDataId"/>
+        <result column="api_type_id" property="apiTypeId"/>
+        <result column="create_date" property="createDate"/>
+    </resultMap>
+
+    <resultMap id="xyGraph" type="com.tmoncorp.wettyapi.model.XyGraph" extends="abstractGraphModel">
+        <result column="data_x" property="dataX"/>
+        <result column="data_t" property="dataY"/>
+    </resultMap>
+
+    <resultMap id="circleGraph" type="com.tmoncorp.wettyapi.model.CircleGraph" extends="abstractGraphModel">
+        <result column="pie_name" property="pieName"/>
+        <result column="count" property="count"/>
+    </resultMap>
+
+    <select id="getGraph" resultMap="graph">
+        SELECT
+            graph_id, graph_name, graph_description, graph_type, base_type, data_type
+            , graph_update_cycle, create_date, update_date
+        FROM
+            graph
+        WHERE
+            graph_id = #{graphId};
+    </select>
+
+    <select id="getBaseTypeCategories" resultMap="baseTypeCategory">
+        SELECT
+            graph_id, category_key, category_value
+        FROM
+            base_type_category
+        WHERE
+            graph_id = #{graphId};
+    </select>
+
+    <select id="getApiTypeIdByGraphId" resultType="java.lang.Integer" >
+        SELECT api_type_id
+        FROM graph AS G INNER JOIN api_type AS A
+        ON G.api_id = A.api_id AND G.base_type = A.base_type AND G.data_type = A.data_type
+        WHERE G.graph_id = #{graphId};
+    </select>
+
+    <select id="getGraphDataFromXyGraph" resultMap="xyGraph">
+        SELECT
+            data_x, data_y
+        FROM
+            xy_graph
+        WHERE
+            api_type_id = #{apiTypeId};
+    </select>
+
+    <select id="getGraphDataFromCircleGraph" resultMap="circleGraph">
+        SELECT
+            pie_name, count
+        FROM
+            circle_graph
+        WHERE
+            api_type_id = #{apiTypeId};
+    </select>
+
+</mapper>
